@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "webarena"
+version = "0.0.0"
+requires-python = ">=3.7, <4"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools]
+packages = ["webarena.browser_env", "webarena.agent", "webarena.evaluation_harness", "webarena.llms", "webarena.llms.providers"]
+package-dir = {"webarena.browser_env" = "browser_env", "webarena.agent" = "agent", "webarena.evaluation_harness" = "evaluation_harness", "webarena.llms" = "llms", "webarena.llms.providers" = "llms/providers"}

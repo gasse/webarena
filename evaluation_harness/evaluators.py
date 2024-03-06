@@ -268,7 +268,10 @@ class HTMLContentEvaluator(Evaluator):
             locator: str = target["locator"]  # js element locator
 
             # navigate to that url
+            prev_page = None
             if target_url != "last":
+                prev_page = page
+                page = page.context.new_page()
                 page.goto(target_url)
                 time.sleep(3)  # TODO [shuyanzh]: fix this hard-coded sleep
 
@@ -330,6 +333,12 @@ class HTMLContentEvaluator(Evaluator):
                 raise ValueError(
                     f"Unknown required_contents: {target['required_contents'].keys()}"
                 )
+
+            if prev_page:
+                page.close()
+                page = prev_page
+                prev_page = None
+
         return score
 
 

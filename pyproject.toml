@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "libwebarena"
 version = "0.0.1"
-description = "This is an unofficial port of the webarena benchmark, for use as a standalone library package."
+description = "This is an unofficial, use-at-your-own risks port of the webarena benchmark, for use as a standalone library package."
+readme = "README.md"
 requires-python = ">=3.7, <4"
 dynamic = ["dependencies"]
 

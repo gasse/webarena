@@ -3,7 +3,7 @@
 Unofficial [WebArena](https://github.com/web-arena-x/webarena) port for compatibility with [BrowserGym](https://github.com/ServiceNow/BrowserGym). Changes below.
 
 More flexible/recent dependencies
- - playwright>=1.32,<1.40
+ - playwright~=1.39
  - openai>=1
  - transformers
 

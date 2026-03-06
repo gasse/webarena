@@ -1,5 +1,8 @@
 """Implements helper functions to assist evaluation cases where other evaluators are not suitable."""
 import json
+import logging
+import os
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -20,10 +23,32 @@ from ..llms.providers.openai_utils import (
 )
 
 
+def _load_pw_extra_headers() -> dict:
+    """Load extra headers from PW_EXTRA_HEADERS env var if set."""
+    extra = {}
+    if os.environ.get("PW_EXTRA_HEADERS"):
+        extra_headers_file_path = Path(os.environ["PW_EXTRA_HEADERS"])
+        try:
+            with open(extra_headers_file_path, "r") as f:
+                extra = json.load(f)
+        except Exception as e:
+            logging.warning(f"Failed to load extra headers from {extra_headers_file_path}: {e}. Make sure to set the PW_EXTRA_HEADERS environment variable to the path of an existing json file containing the extra headers. Continuing without extra headers.")
+    return extra
+
+def _maybe_update_headers(headers: dict) -> dict:
+    """Update headers if PW_EXTRA_HEADERS are available."""
+    extra = _load_pw_extra_headers()
+    if extra:
+        headers.update({
+            "X-Backend-Authorization": headers.pop("Authorization"),
+            "Authorization": extra.pop("Authorization"),
+        })
+    return headers
+
 def shopping_get_auth_token() -> str:
     response = requests.post(
         url=f"{SHOPPING}/rest/default/V1/integration/admin/token",
-        headers={"content-type": "application/json"},
+        headers={"content-type": "application/json", **_load_pw_extra_headers()},
         data=json.dumps(
             {
                 "username": ACCOUNTS["shopping_site_admin"]["username"],
@@ -42,6 +67,7 @@ def shopping_get_latest_order_url() -> str:
         "Authorization": f"Bearer {shopping_get_auth_token()}",
         "Content-Type": "application/json",
     }
+    header = _maybe_update_headers(header)
 
     params = {
         "searchCriteria[sortOrders][0][field]": "created_at",
@@ -65,6 +91,7 @@ def shopping_get_sku_latest_review_author(sku: str) -> str:
         "Authorization": f"Bearer {shopping_get_auth_token()}",
         "Content-Type": "application/json",
     }
+    header = _maybe_update_headers(header)
     response = requests.get(
         f"{SHOPPING}/rest/V1/products/{sku}/reviews", headers=header
     )
@@ -82,6 +109,7 @@ def shopping_get_sku_latest_review_rating(sku: str) -> str:
         "Authorization": f"Bearer {shopping_get_auth_token()}",
         "Content-Type": "application/json",
     }
+    header = _maybe_update_headers(header)
     response = requests.get(
         f"{SHOPPING}/rest/V1/products/{sku}/reviews", headers=header
     )
